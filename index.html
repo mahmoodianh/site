@@ -1,0 +1,393 @@
+<!doctype html>
+<html>
+  <head>
+   
+	 <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Chat me</title>
+    <link rel="stylesheet" type="text/css" href="static/semantic/semantic.min.css" />
+    <link rel="stylesheet" type="text/css" href="static/css/style.css" />
+  </head>
+
+<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+<link rel="stylesheet"  href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    
+ <body>
+ 
+ 
+ <div id="my_main" >
+		
+	
+	
+		<form id="loginform" class="form-horizontal" >
+												
+			
+			<div id="my_user" style="margin-bottom: 25px" class="input-group">
+				<p style=" margin-left:-50px ; font-size:20px;color:#FF0000;" id ="error"></p>
+				
+			</div>
+			
+			<div id="my_user" style="margin-bottom: 25px" class="input-group">
+				<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+				<input style = "width:300px;" id="user" type="text" class="form-control" name="username" value="" placeholder="username">                                        
+			</div>
+			
+			<div id="my_pass" style="margin-bottom: 25px" class="input-group">
+				<span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+				<input style = "width:300px;" id="pass" type="password" class="form-control" name="password" placeholder="password">
+			</div>
+				
+			<div id="my_pic" style="margin-bottom: 25px" class="input-group">
+			
+			<div class="col-sm-2 ">
+				<span> <img style = "width:70px ;border-radius:100%;" src="static/avatars/1.jpg"></span><input id="pic_1" type="checkbox"/>
+			</div>
+			<div class="col-sm-2">
+				<span> <img style = "width:70px ;border-radius:100%;" src="static/avatars/2.jpg"></span><input id="pic_2" type="checkbox"/>
+			</div>
+			<div class="col-sm-2">
+				<span> <img style = "width:70px ;border-radius:100%;" src="static/avatars/3.jpg"></span><input id="pic_3" type="checkbox"/>
+			</div>
+			<div class="col-sm-2">
+				<span> <img style = "width:70px ;border-radius:100%;" src="static/avatars/4.jpg"></span><input id="pic_4" type="checkbox"/>
+			</div>
+			</div>
+
+			<div style="margin-top:10px" class="form-group">
+				<!-- Button -->
+				<div class="col-sm-12 controls">
+					<button type ="submit" class="btn btn-success" >Login</button>
+				
+				</div>
+			</div>
+		</form>     
+		<ul id="messages"></ul>								
+	
+	
+		</div>
+		
+		
+	<div id="container" class="ui grid" style = "display :none;">
+		
+		
+        <div id="friends-list" class="five wide column">
+            <div class="ui raised stacked segment" id="user-info">
+                <h2 class="ui icon center aligned header">
+                    <img style = "width:100px" id = "user_pic" src="" class="ui circular image">
+                    <div class="content">
+					<p id = "wellcome">
+                        Welcome, master!
+						</p>
+                        <div class="sub header">@master</div>
+                    </div>
+                </h2>
+            </div>
+            <div style = "width :270px;" id = "friends" class=" ui vertical menu left" id="roster">
+                <div  class="item">
+                    <div class="ui transparent icon input">
+						<form id="add_friend_form" action ="" >
+                        <input id = "add_friend_val" type="text" placeholder="Add a friend...">
+						<span><i type = "submit" class="user icon"></i></span>
+						<span id="user_not_found" style = "color : #ff0000"></span>
+                        
+						</form>
+                    </div>
+                </div>
+               
+                <!--  friends -->
+				
+            </div>
+        </div>
+
+        <div id="messages-pane" class="eleven wide column">
+            <div id="message-header">
+                <h2 class="ui header">
+                    <i class="comments icon"></i>
+                    <div class="content">
+					<p id="first_master" >
+                        Join Judge me's World !!! Watch our suggested Video...
+					</p>
+					<span id="target_status">
+					</span>
+                        <div id ="status" class="sub header">You are Online</div>
+                    </div>
+                </h2>
+            </div>
+			<div id="show_film"> <iframe src="http://www.aparat.com/video/video/embed/videohash/TJdwD/vt/frame" allowFullScreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" height="500" width="640" ></iframe></div>
+			
+			<div id="messages" style="dispaly : none;" >
+                
+				<div style = "padding : 10px;" id="message_block" class="ui minimal comments">
+					<!--  messages -->
+					
+				</div>
+            </div>
+
+            <div id="message-form-container" >
+                <form id="message" class="ui form" action="">
+                    <div class="ui action input">
+                        <input id="m" type="text" placeholder="Your message here..." dir="auto">
+                        <div class="ui green icon button">
+                            <button type ="submit" class="send icon">Send</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="static/js/jquery-2.1.4.min.js"></script>
+    <script src="static/semantic/semantic.min.js"></script>
+    
+  </body>
+</html>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+	
+  if (Notification.permission !== "granted")
+  {
+    Notification.requestPermission();
+	//alert("salam");
+	}
+});
+
+function notifyMe() {
+  if (!Notification) {
+    alert('Desktop notifications not available in your browser. Try Chromium.'); 
+    return;
+  }
+
+  if (Notification.permission !== "granted")
+    Notification.requestPermission();
+  else {
+    var notification = new Notification('New message ', {
+      icon: "http://localhost:3000/cherry.gif",//'http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png',
+      body: "You have a new message from :" + chat_with,
+    });
+/*
+    notification.onclick = function () {
+      window.open("localhost:3000");      
+    };
+	*/
+
+  }
+
+}
+
+
+//setInterval(function() { window.focus() }, 5000);
+
+
+  var socket = io();
+  var is_active = 1;
+  
+   $(window).focus(function() {
+	//alert("active")
+    is_active = 1;
+	var chat_with = "";
+	
+});
+
+$(window).blur(function() {
+    is_active = 0;
+	//alert("deactive")
+});
+  
+  
+  socket.on('master_note', function(msg){
+  //  alert(msg);
+   
+   $('#status').html("You are Online !!!");
+   msg = msg.split("$$");
+   if(msg[0] == "none")
+   {
+   $('#wellcome').html("wellcome,  " + msg[1]+"!");
+   $("#user_pic").attr("src",msg[2]);
+	$('#container').css('display','');
+	$('#my_main').css('display','none');
+	
+			$('#friends').append(msg[3]);
+	
+		update_friends();
+	}
+	else
+	{
+		
+		$('#error').html(msg[0]);
+	}
+  });
+  
+  socket.on('new_comment', function(msg){
+   
+   $('#message_block').append(msg);
+   if(!is_active)
+	notifyMe();
+	
+	
+  });
+  
+  socket.on('disconnect', function(msg){
+   
+   $('#status').html("You are offline");
+	
+  });
+
+ socket.on('not find', function(msg){
+ 
+   $('#user_not_found').html(msg +" not found");
+   //alert(msg +" not found");
+	
+  });
+
+  
+  socket.on('online_time', function(msg){
+   
+   $('#target_status').html("Last online time  :" + msg);
+	
+  });
+  
+  
+  
+  socket.on('ok_add_friend', function(msg){
+ // alert(msg);
+   $('#friends').append(msg);
+   update_friends();
+	
+  });
+  
+  
+  socket.on('update_active', function(msg){
+   
+	var friends = $('.friend_list');
+	for (var i=0;i<friends.length;i++)
+	{
+	
+		if(friends[i].getElementsByTagName('span')[0].innerHTML == msg )
+			{
+		
+				friends[i].classList.add("green")
+			
+				break;
+			}
+	}
+
+	
+  });
+  
+  
+  socket.on('update_deactive', function(msg){
+
+	//alert(msg);
+	var friends = $('.friend_list');
+
+	for (var i=0;i<friends.length;i++)
+	{
+	
+		if(friends[i].getElementsByTagName('span')[0].innerHTML == msg )
+			{
+		
+				friends[i].classList.remove("green")
+			
+				break;
+			}
+	}
+
+	
+  });
+  
+  
+  socket.on('show_messages', function(msg){
+
+   $('#message_block').append(msg);
+
+	
+  });
+  
+  
+  socket.on('update_message_num', function(msg){
+
+   $('#friends a').remove();
+   $('#friends').append(msg);
+   update_friends();
+   
+   
+
+	
+  });
+  
+  
+  $('#add_friend_form').submit(function(){
+	$('#user_not_found').html("");
+    socket.emit('add_friend', $('#add_friend_val').val() );
+    $('#add_friend_val').val('');
+	
+	
+    return false;
+  });
+  
+  
+  
+  
+  $('#loginform').submit(function(){
+	
+	var pic = 1;
+	for ( i = 1;i<5;i++)
+	{
+		name = "pic" + String(i);
+		if($('#pic_'+ i).is(':checked')){
+	
+		pic = i;
+		}	
+	}
+    socket.emit('login', $('#user').val() + "$$" + $('#pass').val() +"$$"+ pic);
+    $('#user').val('');
+	$('#pass').val('');
+	
+    return false;
+  });
+  
+  var update_friends =function(){  $('.friend_list span').click(function(){
+	$('#show_film').remove();
+	$('#messages').css('display','');
+	
+	$('#first_master').html("Conversation With  : " + $(this).html() );
+	this.nextSibling.innerHTML = "";
+	$('#message_block').empty();
+	chat_with = $(this).html();
+	socket.emit('choose_friend', $(this).html());
+})}
+  
+  $('#message').submit(function(){
+	
+    socket.emit('chat message', $('#m').val());
+    $('#m').val('');
+    return false;
+  });
+  
+  
+  
+ 
+</script>
+
+ <style>
+ body {
+    background-image: url("music.jpeg");
+	background-size:  100%;
+    background-repeat: no-repeat;	
+}
+
+#my_main{ 
+	margin-top : 20px;
+	margin-left: 100px;
+	
+    
+}
+button {margin-left: 150px;}
+
+
+ </style>
+ 
+ 
+ 
